@@ -76,7 +76,7 @@ ParkingLotDetector/
 ---
 
 # PART 1 — Data & Preprocessing
-### Assigned to: **JJ Araim**
+### Assigned to: **Kellen Andrews**
 **Files:** `preprocess.py`
 
 ---
@@ -158,6 +158,7 @@ print(f"Occupied: {occupied} | Empty: {empty}")
 You want at least a few thousand images total. If the dataset is heavily imbalanced, note it for the report.
 
 ### Step 1.4 — Write a short dataset section for the report
+### Assigned to: **Kellen Andrews**
 
 Document in `report.md`:
 - Where the data came from
@@ -171,7 +172,7 @@ Document in `report.md`:
 
 # PART 2 — Model Architecture & Training
 ### Assigned to: **Kellen Andrews**
-**Files:** `model.py`, `train.py`
+**Files:** `model.py`, `train.py`, `train_results.png`
 
 ---
 
@@ -303,7 +304,7 @@ python train.py
 ---
 
 # PART 3 — Evaluation & Demo Visualization
-### Assigned to: **Both (split evenly)**
+### Assigned to: **JJ Araim**
 
 ---
 
@@ -365,7 +366,7 @@ print("Saved confusion_matrix.png")
 ```
 
 ### Step 3.2 — Build the visual demo (`demo.py`)
-### Assigned to: **Kellen Andrews**
+### Assigned to: **JJ Araim**
 
 This takes a full parking lot image, uses the saved spot coordinates, runs the model on each crop, and draws a **green (empty) / red (occupied)** overlay.
 
@@ -461,12 +462,12 @@ File must be submitted as part of the zip.
 | Section | Owner |
 |---------|-------|
 | Introduction & Problem Statement | JJ |
-| Dataset Description | JJ (already documented in Part 1) |
-| Intelligent System Lifecycle | Kellen |
+| Dataset Description | Kellen (documented in Part 1) |
+| Intelligent System Lifecycle | JJ |
 | Model Architecture | Kellen |
 | Training & Results | Kellen |
 | Evaluation & Discussion | JJ |
-| Demo Description | Kellen |
+| Demo Description | JJ |
 | Conclusion & Ethical Considerations | Both |
 
 **Required content per the grading rubric:**
@@ -490,12 +491,12 @@ File must be submitted as part of the zip.
 | Slide | Content | Owner |
 |-------|---------|-------|
 | 1 | Title, team, problem overview | Both |
-| 2 | Dataset & preprocessing | JJ |
-| 3 | IS lifecycle applied to this project | Kellen |
+| 2 | Dataset & preprocessing | Kellen |
+| 3 | IS lifecycle applied to this project | JJ |
 | 4 | Model architecture | Kellen |
 | 5 | Training results (loss curve, accuracy) | Kellen |
 | 6 | Evaluation (classification report, confusion matrix) | JJ |
-| 7 | Live demo — `demo.py` on a sample lot image | Kellen |
+| 7 | Live demo — `demo.py` on a sample lot image | JJ |
 | 8 | Findings, limitations, what we'd improve | Both |
 | 9 | Ethical considerations | JJ |
 
@@ -515,11 +516,11 @@ File must be submitted as part of the zip.
 
 | Date | Task |
 |------|------|
-| Apr 16–17 | Download dataset, run `preprocess.py`, verify data (JJ) |
+| Apr 16–17 | Download dataset, run `preprocess.py`, verify data (Kellen) |
 | Apr 16–18 | Write `model.py` + `train.py`, get first training run (Kellen) |
 | Apr 19–20 | Tune model, hit target accuracy (Kellen) |
 | Apr 20–21 | Write `evaluate.py`, generate confusion matrix (JJ) |
-| Apr 21–22 | Build `demo.py`, generate lot overlay (Kellen) |
+| Apr 21–22 | Build `demo.py`, generate lot overlay (JJ) |
 | Apr 22–24 | Write report sections (both) |
 | Apr 24–26 | Build presentation slides (both) |
 | Apr 27 | Dry run full demo, fix any issues |

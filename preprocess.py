@@ -3,8 +3,8 @@ import cv2
 import os
 
 ANNOTATIONS_PATH = "./data/annotations.xml"
-EMPTY_DIR = "data/empty"
-OCCUPIED_DIR = "data/occupied"
+EMPTY_DIR = "data/crops/empty"
+OCCUPIED_DIR = "data/crops/occupied"
 
 
 def getMaxCoords(points):

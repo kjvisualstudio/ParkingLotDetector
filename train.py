@@ -1,6 +1,6 @@
 import torch
 import torch.nn as nn
-from torch.utils.data import DataLoader, random_split
+from torch.utils.data import DataLoader
 from torchvision import datasets, transforms
 
 from model import get_model
@@ -37,12 +37,13 @@ def load_data():
     train_transform, val_transform = get_transforms()
 
     full_dataset = datasets.ImageFolder(DATA_DIR, transform=train_transform)
+    val_dataset  = datasets.ImageFolder(DATA_DIR, transform=val_transform)
 
     train_size = int(0.8 * len(full_dataset))
-    val_size = len(full_dataset) - train_size
-    train_set, val_set = random_split(full_dataset, [train_size, val_size])
-
-    val_set.dataset = datasets.ImageFolder(DATA_DIR, transform=val_transform)
+    val_size   = len(full_dataset) - train_size
+    indices    = list(range(len(full_dataset)))
+    train_set  = torch.utils.data.Subset(full_dataset, indices[:train_size])
+    val_set    = torch.utils.data.Subset(val_dataset,  indices[train_size:])
 
     class_names = full_dataset.classes
     print(f"Classes: {class_names}")

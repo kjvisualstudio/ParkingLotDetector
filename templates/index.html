@@ -1,0 +1,314 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Parking Lot Detector</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      background: #0f1117;
+      color: #e2e8f0;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 40px 20px;
+    }
+
+    h1 {
+      font-size: 1.8rem;
+      font-weight: 700;
+      margin-bottom: 8px;
+      letter-spacing: -0.5px;
+    }
+
+    .subtitle {
+      color: #64748b;
+      font-size: 0.95rem;
+      margin-bottom: 36px;
+    }
+
+    .card {
+      background: #1e2130;
+      border: 1px solid #2d3249;
+      border-radius: 12px;
+      padding: 28px;
+      width: 100%;
+      max-width: 640px;
+    }
+
+    .upload-row {
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+      margin-bottom: 20px;
+    }
+
+    .upload-field label {
+      display: block;
+      font-size: 0.8rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      color: #94a3b8;
+      margin-bottom: 6px;
+    }
+
+    .drop-zone {
+      border: 2px dashed #2d3249;
+      border-radius: 8px;
+      padding: 20px;
+      text-align: center;
+      cursor: pointer;
+      transition: border-color 0.2s, background 0.2s;
+      position: relative;
+    }
+
+    .drop-zone:hover, .drop-zone.drag-over {
+      border-color: #4f7cff;
+      background: rgba(79, 124, 255, 0.05);
+    }
+
+    .drop-zone input[type="file"] {
+      position: absolute;
+      inset: 0;
+      opacity: 0;
+      cursor: pointer;
+      width: 100%;
+      height: 100%;
+    }
+
+    .drop-zone .icon {
+      font-size: 1.5rem;
+      margin-bottom: 6px;
+    }
+
+    .drop-zone .hint {
+      font-size: 0.85rem;
+      color: #64748b;
+    }
+
+    .drop-zone .filename {
+      font-size: 0.85rem;
+      color: #4f7cff;
+      margin-top: 4px;
+      font-weight: 500;
+    }
+
+    button[type="submit"] {
+      width: 100%;
+      padding: 12px;
+      background: #4f7cff;
+      color: #fff;
+      border: none;
+      border-radius: 8px;
+      font-size: 0.95rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: background 0.2s;
+    }
+
+    button[type="submit"]:hover:not(:disabled) { background: #3b66e8; }
+    button[type="submit"]:disabled { background: #2d3249; color: #64748b; cursor: not-allowed; }
+
+    #status {
+      text-align: center;
+      font-size: 0.85rem;
+      color: #64748b;
+      min-height: 20px;
+      margin-top: 12px;
+    }
+
+    #error-msg {
+      color: #f87171;
+      font-size: 0.85rem;
+      text-align: center;
+      margin-top: 12px;
+    }
+
+    #results {
+      margin-top: 28px;
+      width: 100%;
+      max-width: 640px;
+    }
+
+    .stats {
+      display: flex;
+      gap: 12px;
+      margin-bottom: 16px;
+    }
+
+    .stat-box {
+      flex: 1;
+      background: #1e2130;
+      border: 1px solid #2d3249;
+      border-radius: 8px;
+      padding: 14px;
+      text-align: center;
+    }
+
+    .stat-box .value {
+      font-size: 1.8rem;
+      font-weight: 700;
+    }
+
+    .stat-box .label {
+      font-size: 0.75rem;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      color: #64748b;
+      margin-top: 2px;
+    }
+
+    .stat-box.empty .value { color: #4ade80; }
+    .stat-box.occupied .value { color: #f87171; }
+    .stat-box.total .value { color: #94a3b8; }
+
+    #output-img {
+      width: 100%;
+      border-radius: 8px;
+      border: 1px solid #2d3249;
+    }
+
+    .spinner {
+      display: inline-block;
+      width: 16px;
+      height: 16px;
+      border: 2px solid #4f7cff;
+      border-top-color: transparent;
+      border-radius: 50%;
+      animation: spin 0.7s linear infinite;
+      vertical-align: middle;
+      margin-right: 6px;
+    }
+
+    @keyframes spin { to { transform: rotate(360deg); } }
+  </style>
+</head>
+<body>
+
+  <h1>Parking Lot Detector</h1>
+  <p class="subtitle">Upload a parking lot image and its annotation file to classify spots.</p>
+
+  <div class="card">
+    <form id="upload-form">
+      <div class="upload-row">
+
+        <div class="upload-field">
+          <label>Parking Lot Image</label>
+          <div class="drop-zone" id="img-zone">
+            <input type="file" name="image" id="img-input" accept="image/*" required />
+            <div class="icon">&#128247;</div>
+            <div class="hint">Click or drag &amp; drop an image (PNG, JPG)</div>
+            <div class="filename" id="img-name"></div>
+          </div>
+        </div>
+
+        <div class="upload-field">
+          <label>Annotations XML <span style="color:#64748b;font-weight:400;text-transform:none;">(optional — only needed for new images)</span></label>
+          <div class="drop-zone" id="xml-zone">
+            <input type="file" name="annotations" id="xml-input" accept=".xml,text/xml" />
+            <div class="icon">&#128196;</div>
+            <div class="hint">Click or drag &amp; drop an annotations .xml file</div>
+            <div class="filename" id="xml-name"></div>
+          </div>
+        </div>
+
+      </div>
+
+      <button type="submit" id="submit-btn">Detect Parking Spots</button>
+    </form>
+
+    <div id="status"></div>
+    <div id="error-msg"></div>
+  </div>
+
+  <div id="results" style="display:none;">
+    <div class="stats">
+      <div class="stat-box empty">
+        <div class="value" id="stat-empty">—</div>
+        <div class="label">Empty</div>
+      </div>
+      <div class="stat-box occupied">
+        <div class="value" id="stat-occupied">—</div>
+        <div class="label">Occupied</div>
+      </div>
+      <div class="stat-box total">
+        <div class="value" id="stat-total">—</div>
+        <div class="label">Total</div>
+      </div>
+    </div>
+    <img id="output-img" alt="Detection result" />
+  </div>
+
+  <script>
+    function bindDropZone(zoneId, inputId, nameId) {
+      const zone = document.getElementById(zoneId);
+      const input = document.getElementById(inputId);
+      const nameEl = document.getElementById(nameId);
+
+      input.addEventListener("change", () => {
+        if (input.files[0]) nameEl.textContent = input.files[0].name;
+      });
+
+      zone.addEventListener("dragover", e => { e.preventDefault(); zone.classList.add("drag-over"); });
+      zone.addEventListener("dragleave", () => zone.classList.remove("drag-over"));
+      zone.addEventListener("drop", e => {
+        e.preventDefault();
+        zone.classList.remove("drag-over");
+        if (e.dataTransfer.files[0]) {
+          const dt = new DataTransfer();
+          dt.items.add(e.dataTransfer.files[0]);
+          input.files = dt.files;
+          nameEl.textContent = e.dataTransfer.files[0].name;
+        }
+      });
+    }
+
+    bindDropZone("img-zone", "img-input", "img-name");
+    bindDropZone("xml-zone", "xml-input", "xml-name");
+
+    document.getElementById("upload-form").addEventListener("submit", async (e) => {
+      e.preventDefault();
+
+      const btn = document.getElementById("submit-btn");
+      const status = document.getElementById("status");
+      const errMsg = document.getElementById("error-msg");
+      const results = document.getElementById("results");
+
+      errMsg.textContent = "";
+      results.style.display = "none";
+      btn.disabled = true;
+      status.innerHTML = '<span class="spinner"></span> Running inference...';
+
+      const formData = new FormData(e.target);
+
+      try {
+        const res = await fetch("/predict", { method: "POST", body: formData });
+        const data = await res.json();
+
+        if (data.error) {
+          errMsg.textContent = "Error: " + data.error;
+          status.textContent = "";
+        } else {
+          document.getElementById("stat-empty").textContent = data.empty;
+          document.getElementById("stat-occupied").textContent = data.occupied;
+          document.getElementById("stat-total").textContent = data.total;
+          document.getElementById("output-img").src = "data:image/png;base64," + data.image;
+          results.style.display = "block";
+          status.textContent = "Done.";
+        }
+      } catch (err) {
+        errMsg.textContent = "Request failed: " + err.message;
+        status.textContent = "";
+      } finally {
+        btn.disabled = false;
+      }
+    });
+  </script>
+
+</body>
+</html>

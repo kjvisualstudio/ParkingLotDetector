@@ -11,6 +11,9 @@ EPOCHS = 10
 LEARNING_RATE = 0.001
 IMAGE_SIZE = 64
 SAVE_PATH = "best_model.pth"
+SEED = 42
+TRAIN_RATIO = 0.70
+VAL_RATIO = 0.15
 
 IMAGENET_MEAN = [0.485, 0.456, 0.406]
 IMAGENET_STD = [0.229, 0.224, 0.225]
@@ -39,15 +42,24 @@ def load_data():
     full_dataset = datasets.ImageFolder(DATA_DIR, transform=train_transform)
     val_dataset  = datasets.ImageFolder(DATA_DIR, transform=val_transform)
 
-    train_size = int(0.8 * len(full_dataset))
-    val_size   = len(full_dataset) - train_size
-    indices    = list(range(len(full_dataset)))
-    train_set  = torch.utils.data.Subset(full_dataset, indices[:train_size])
-    val_set    = torch.utils.data.Subset(val_dataset,  indices[train_size:])
+    n = len(full_dataset)
+    train_size = int(TRAIN_RATIO * n)
+    val_size   = int(VAL_RATIO * n)
+    test_size  = n - train_size - val_size
+
+    generator = torch.Generator().manual_seed(SEED)
+    indices = torch.randperm(n, generator=generator).tolist()
+
+    train_indices = indices[:train_size]
+    val_indices   = indices[train_size:train_size + val_size]
+    test_indices  = indices[train_size + val_size:]
+
+    train_set = torch.utils.data.Subset(full_dataset, train_indices)
+    val_set   = torch.utils.data.Subset(val_dataset,  val_indices)
 
     class_names = full_dataset.classes
     print(f"Classes: {class_names}")
-    print(f"Total: {len(full_dataset)} | Train: {train_size} | Val: {val_size}")
+    print(f"Total: {n} | Train: {train_size} | Val: {val_size} | Test: {test_size}")
 
     class_counts = [0] * len(class_names)
     for _, label in full_dataset.samples:
